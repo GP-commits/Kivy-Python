@@ -1,26 +1,59 @@
 import asyncio
 import websockets
+import json
 
-connected_clients = set()
+rooms = {}
 
 async def handle_client(websocket):
-    connected_clients.add(websocket)
-    print(f"[SERVER] New user joined! Total users: {len(connected_clients)}")
-    
+    print(f"[SERVER] New connection from {websocket.remote_address}")
+    my_rooms = set() 
+
     try:
         async for message in websocket:
-            print(f"[SERVER] Received: {message}")
-            
-            websockets.broadcast(connected_clients, f"Broadcast: {message}")
-            
+            try:
+                data = json.loads(message)
+            except json.JSONDecodeError:
+                print("[SERVER] Error: Received message is not valid JSON.")
+                continue 
+
+            action = data.get("action")
+            room_name = data.get("room")
+
+            if action == "join" and room_name:
+                if room_name not in rooms:
+                    rooms[room_name] = set()
+                
+                rooms[room_name].add(websocket)
+                my_rooms.add(room_name)
+                print(f"[SERVER] User joined room: {room_name}")
+                
+                success_msg = json.dumps({"status": "success", "message": f"Joined {room_name}"})
+                await websocket.send(success_msg)
+
+            elif action == "message" and room_name:
+                if room_name in rooms:
+                    content = data.get("content", "")
+                    
+                    outgoing_msg = json.dumps({
+                        "room": room_name,
+                        "content": content
+                    })
+                    
+                    websockets.broadcast(rooms[room_name], outgoing_msg)
+                    print(f"[SERVER] Broadcasted to {room_name}: {content}")
+
     except websockets.exceptions.ConnectionClosed:
-        pass    
+        pass
     finally:
-        connected_clients.remove(websocket)
-        print(f"[SERVER] User left. Total users: {len(connected_clients)}")
+        for room in my_rooms:
+            if websocket in rooms[room]:
+                rooms[room].remove(websocket)
+                if len(rooms[room]) == 0:
+                    del rooms[room]
+        print(f"[SERVER] User disconnected and cleaned up.")
 
 async def main():
-    print("[SERVER] Starting on port 8765") #ws://localhost:8765
+    print("[SERVER] Starting JSON Room Server on ws://localhost:8765")
     async with websockets.serve(handle_client, "localhost", 8765):
         await asyncio.Future()
 

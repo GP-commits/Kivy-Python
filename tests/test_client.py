@@ -1,23 +1,47 @@
 import asyncio
 import websockets
+import json
 import pytest
 
-uri = "ws://localhost:8765"
+URI = "ws://localhost:8765"
 
 @pytest.mark.asyncio
-async def test_single_client():
-    async with websockets.connect(uri) as ws:
-        await ws.send("Hello from Test 1")
-        response = await ws.recv()
-        assert "Broadcast: Hello from Test 1" in response
+async def test_room_join_and_message():
+    async with websockets.connect(URI) as ws:
+        join_cmd = {"action": "join", "room": "lobby"}
+        await ws.send(json.dumps(join_cmd))
+    
+        raw_resp = await ws.recv()
+        resp = json.loads(raw_resp)
+        assert resp["status"] == "success"
+
+        msg_cmd = {"action": "message", "room": "lobby", "content": "Hello Team!"}
+        await ws.send(json.dumps(msg_cmd))
+        
+        raw_broadcast = await ws.recv()
+        broadcast = json.loads(raw_broadcast)
+        assert broadcast["room"] == "lobby"
+        assert broadcast["content"] == "Hello Team!"
 
 @pytest.mark.asyncio
-async def test_50_clients(): # stress testing with 50 clients
+async def test_stress_multi_room_routing():
+    """Stress test: 50 clients in different rooms should only hear their own room's noise."""
+    
     async def fake_client_task(client_id):
-        async with websockets.connect(uri) as ws:
-            await ws.send(f"Stress test message {client_id}")
-            response = await ws.recv()
-            assert "Broadcast:" in response
+        room_name = "room_A" if client_id % 2 == 0 else "room_B"
+        
+        async with websockets.connect(URI) as ws:
+            await ws.send(json.dumps({"action": "join", "room": room_name}))
+            await ws.recv()
+            
+            test_content = f"Message from {client_id}"
+            await ws.send(json.dumps({"action": "message", "room": room_name, "content": test_content}))
+            
+            raw_data = await ws.recv()
+            data = json.loads(raw_data)
+            
+            assert data["room"] == room_name
+            assert test_content in data["content"]
 
     tasks = [fake_client_task(i) for i in range(50)]
-    await asyncio.gather(*tasks) # runninng all 50 clients at the same time :)
+    await asyncio.gather(*tasks)
