@@ -4,7 +4,7 @@ import json
 import pytest
 
 URI = "ws://localhost:8765"
-
+    
 @pytest.mark.asyncio
 async def test_room_join_and_message():
     async with websockets.connect(URI) as ws:

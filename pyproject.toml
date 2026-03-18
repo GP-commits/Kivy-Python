@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kivy-network"
+version = "0.1.0"
+authors = [
+  { name="Etherum Miners", email="vjs.sreenivas@gmail.com" },
+]
+description = "A real-time async WebSocket networking engine for Kivy."
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "websockets>=16.0",
+    "kivy>=2.3.1"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.0.2",
+    "pytest-asyncio==1.3.0",
+    "requests==2.32.5"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/GP-commits/Kivy-Python"
