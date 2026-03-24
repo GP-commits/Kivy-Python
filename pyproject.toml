@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kivy-network"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
   { name="Etherum Miners", email="vjs.sreenivas@gmail.com" },
 ]
@@ -14,6 +14,15 @@ requires-python = ">=3.8"
 dependencies = [
     "websockets>=16.0",
     "kivy>=2.3.1"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
 [project.optional-dependencies]
