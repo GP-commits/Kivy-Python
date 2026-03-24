@@ -1,8 +1,9 @@
 from kivy.event import EventDispatcher
 from kivy.clock import Clock
 
+
 class NetworkEventDispatcher(EventDispatcher):
-    __events__ = ('on_connected', 'on_message', 'on_error')
+    __events__ = ("on_connected", "on_message", "on_error")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -18,10 +19,10 @@ class NetworkEventDispatcher(EventDispatcher):
         pass
 
     def trigger_message_safely(self, data):
-        Clock.schedule_once(lambda dt: self.dispatch('on_message', data), 0)
+        Clock.schedule_once(lambda dt: self.dispatch("on_message", data), 0)
 
     def trigger_connected_safely(self, *args):
-        Clock.schedule_once(lambda dt: self.dispatch('on_connected', *args), 0)
+        Clock.schedule_once(lambda dt: self.dispatch("on_connected", *args), 0)
 
     def trigger_error_safely(self, error_msg):
-        Clock.schedule_once(lambda dt: self.dispatch('on_error', error_msg), 0)
+        Clock.schedule_once(lambda dt: self.dispatch("on_error", error_msg), 0)

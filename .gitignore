@@ -1,16 +1,13 @@
+.venv/
 __pycache__/
 *.py[cod]
 *$py.class
-
-.venv/
-venv/
-env/
 
 dist/
 build/
 *.egg-info/
 kivy_network.egg-info/
-
+.ruff_cache/
 .pytest_cache/
 .coverage
 

@@ -3,42 +3,21 @@ import websockets
 import json
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
-from kivy.event import EventDispatcher
-from kivy.clock import Clock
+
+# FIX 1: Corrected import path
+from kivy_network.events import NetworkDispatcher
+
 
 @dataclass
 class NetworkMessage:
-    type: str               
-    room: Optional[str]     
-    content: Optional[str] 
-    sender_id: Optional[str] 
-    raw_data: Dict[str, Any] 
-
-class NetworkEventDispatcher(EventDispatcher):
-    __events__ = ('on_connected', 'on_message', 'on_error', 'on_disconnected')
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def on_connected(self, *args): pass
-    def on_message(self, message: NetworkMessage): pass 
-    def on_error(self, error_msg: str): pass
-    def on_disconnected(self, *args): pass
-
-    def trigger_message_safely(self, message_obj: NetworkMessage):
-        Clock.schedule_once(lambda dt: self.dispatch('on_message', message_obj), 0)
-
-    def trigger_connected_safely(self):
-        Clock.schedule_once(lambda dt: self.dispatch('on_connected'), 0)
-
-    def trigger_error_safely(self, error_msg: str):
-        Clock.schedule_once(lambda dt: self.dispatch('on_error', error_msg), 0)
-        
-    def trigger_disconnected_safely(self):
-        Clock.schedule_once(lambda dt: self.dispatch('on_disconnected'), 0)
+    type: str
+    room: Optional[str]
+    content: Optional[str]
+    sender_id: Optional[str]
+    raw_data: Dict[str, Any]
 
 
-class RealTimeClient(NetworkEventDispatcher):
+class RealTimeClient(NetworkDispatcher):
     def __init__(self, uri: str = "ws://localhost:8765", **kwargs):
         super().__init__(**kwargs)
         self.uri = uri
@@ -56,13 +35,20 @@ class RealTimeClient(NetworkEventDispatcher):
                     self.websocket = ws
                     self.connected = True
                     self.reconnect_delay = 1
-                    self.trigger_connected_safely()
+
+                    self.trigger_event_safely("on_connected")
+
                     await self._listen()
-                    
-            except (websockets.exceptions.ConnectionClosedError, ConnectionRefusedError):
+
+            except (
+                websockets.exceptions.ConnectionClosedError,
+                ConnectionRefusedError,
+            ):
                 self.connected = False
-                self.trigger_disconnected_safely()
-                self.trigger_error_safely("Connection dropped.")
+
+                self.trigger_event_safely("on_disconnected")
+                self.trigger_event_safely("on_error", "Connection dropped.")
+
                 await asyncio.sleep(self.reconnect_delay)
                 self.reconnect_delay = min(self.reconnect_delay * 2, self.max_delay)
             except Exception as e:
@@ -71,26 +57,47 @@ class RealTimeClient(NetworkEventDispatcher):
 
     async def _listen(self) -> None:
         async for message in self.websocket:
-            data = json.loads(message)
-            
-            if data.get("type") == "welcome":
-                self.client_id = data.get("client_id")
-            else:
-                msg_obj = NetworkMessage(
-                    type=data.get("type", "unknown"),
-                    room=data.get("room"),
-                    content=data.get("content"),
-                    sender_id=data.get("sender_id"),
-                    raw_data=data
+            # FIX 2: Fixed the indentation alignment here!
+            try:
+                data = json.loads(message)
+
+                if not isinstance(data, dict):
+                    raise ValueError(
+                        "Payload is a valid JSON format, but not a dictionary object."
+                    )
+
+                if data.get("type") == "welcome":
+                    self.client_id = data.get("client_id")
+                    print(f"[CLIENT] Server assigned ID: {self.client_id}")
+                else:
+                    msg_obj = NetworkMessage(
+                        type=data.get("type", "unknown"),
+                        room=data.get("room"),
+                        content=data.get("content"),
+                        sender_id=data.get("sender_id"),
+                        raw_data=data,
+                    )
+                    self.trigger_event_safely("on_message_received", msg_obj)
+
+            except json.JSONDecodeError:
+                print(f"[CLIENT - CHAOS SHIELD] Blocked malformed JSON: {message}")
+                self.trigger_event_safely("on_error", "Ignored corrupted data packet.")
+
+            except ValueError as ve:
+                print(f"[CLIENT - CHAOS SHIELD] Blocked invalid structure: {ve}")
+                self.trigger_event_safely("on_error", "Ignored invalid data structure.")
+
+            except Exception as e:
+                print(
+                    f"[CLIENT - CHAOS SHIELD] Unexpected error processing message: {e}"
                 )
-                self.trigger_message_safely(msg_obj)
 
-    async def join_room(self, room_name: str) -> None:
+    async def join_room(self, room: str) -> None:
         if self.connected and self.websocket:
-            data = {"action": "join", "room": room_name}
-            await self.websocket.send(json.dumps(data))
+            payload = {"action": "join", "room": room}
+            await self.websocket.send(json.dumps(payload))
 
-    async def send_chat(self, room_name: str, content: str) -> None:
+    async def send_chat(self, room: str, content: str) -> None:
         if self.connected and self.websocket:
-            data = {"action": "message", "room": room_name, "content": content}
-            await self.websocket.send(json.dumps(data))
+            payload = {"action": "message", "room": room, "content": content}
+            await self.websocket.send(json.dumps(payload))

@@ -28,7 +28,7 @@ class ChatUI(BoxLayout):
 
         self.network = RealTimeClient("ws://localhost:8765")
         self.network.bind(on_connected=self.on_connect)
-        self.network.bind(on_message=self.on_message)
+        self.network.bind(on_message_received=self.on_message)
         self.network.bind(on_disconnected=self.on_disconnect)
 
     def on_connect(self, instance):
