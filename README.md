@@ -1,7 +1,7 @@
 # Kivy Network 🌐
 
 [![PyPI version](https://img.shields.io/pypi/v/kivy-network.svg)](https://pypi.org/project/kivy-network/)
-[![Python versions](https://img.shields.io/pypi/pyversions/kivy-network.svg)](https://pypi.org/project/kivy-network/)
+[![Python versions](https://img.shields.io/pypi/pyversions/kivy-network.svg?v=0.1.2)](https://pypi.org/project/kivy-network/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A robust, asynchronous, real-time WebSocket networking engine specifically designed for **Kivy** applications.
@@ -36,11 +36,11 @@ _(Note: Ensure you have Kivy installed and configured for your operating system)
 
 Here is how easy it is to drop `kivy-network` into your application.
 
-```python
+````python
 import asyncio
 from kivy.app import App
 from kivy.uix.label import Label
-from kivy-network.network_client import RealTimeClient
+from kivy_network.network_client import RealTimeClient
 
 class MultiplayerApp(App):
     def build(self):
@@ -49,7 +49,7 @@ class MultiplayerApp(App):
         self.network = RealTimeClient("ws://localhost:8765")
 
         self.network.bind(on_connected=self.on_connect)
-        self.network.bind(on_message=self.on_message)
+        self.network.bind(on_message_received=self.on_message)
         self.network.bind(on_disconnected=self.on_disconnect)
 
         asyncio.create_task(self.network.run_forever())
@@ -69,9 +69,7 @@ class MultiplayerApp(App):
 
 if __name__ == "__main__":
     asyncio.run(MultiplayerApp().async_run(async_lib='asyncio'))
-```
 
-### 2. The NetworkMessage API
 
 Every time your UI receives an `on_message` event, it receives a strictly-typed `NetworkMessage` dataclass with the following properties available for autocomplete:
 
@@ -102,7 +100,7 @@ async def main():
         await asyncio.Future()
 
 asyncio.run(main())
-```
+````
 
 ---
 
