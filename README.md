@@ -1,4 +1,4 @@
-# Kivy Python Projects 🐍✨
+# Kivy Python Projects 
 
 This repository contains custom packages, utilities, and UI behaviors built for the [Kivy](https://kivy.org/) framework. Each project acts as an independent module designed to add professional features or functionality to Kivy applications.
 
