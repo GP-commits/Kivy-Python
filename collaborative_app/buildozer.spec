@@ -19,20 +19,26 @@ source.include_exts = py,png,jpg,kv,atlas
 version = 0.1
 
 # (list) Application requirements
-# comma separated e.g. requirements = sqlite3,kivy
-# We need websockets for the network, and kivy
+# We need websockets and kivy
 requirements = python3,kivy,websockets
-
-# (str) Custom source folders for requirements
-# This is how we include your local libraries into the mobile app!
-# It tells buildozer to package these directories directly into the APK.
-source.include_dirs = ../kivy-dragdrop, ../kivy-network-project
 
 # (str) Supported orientations
 orientation = portrait
 
 # (bool) Indicate if the application should be fullscreen or not
 fullscreen = 0
+
+# (int) Android API to use
+android.api = 33
+
+# (int) Minimum API your APK will support
+android.minapi = 21
+
+# (bool) Accept SDK license
+android.accept_sdk_license = True
+
+# (str) Android NDK version to use
+# android.ndk = 25b
 
 [buildozer]
 

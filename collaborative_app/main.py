@@ -1,28 +1,5 @@
-import sys
-import os
 import json
 import asyncio
-
-# Setup paths so we can import the local packages even without pip install
-repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-# For kivy-dragdrop
-sys.path.insert(0, os.path.join(repo_root, 'kivy-dragdrop'))
-
-# For kivy-network-project (it expects to be imported as "kivy_network")
-# Since the folder is named "kivy-network-project", we might need a symlink or just modify sys.modules
-# But wait, we can just dynamically load it or assume it's pip installed for now.
-# To ensure it runs out of the box without pip install:
-kivy_net_path = os.path.join(repo_root, 'kivy-network-project')
-sys.path.insert(0, repo_root)
-
-# Hack to alias "kivy-network-project" directory to "kivy_network" module namespace if not installed
-import importlib.util
-if not importlib.util.find_spec("kivy_network"):
-    import importlib.machinery
-    sys.modules['kivy_network'] = importlib.machinery.SourceFileLoader('kivy_network', os.path.join(kivy_net_path, '__init__.py')).load_module()
-    sys.modules['kivy_network.events'] = importlib.machinery.SourceFileLoader('kivy_network.events', os.path.join(kivy_net_path, 'events.py')).load_module()
-    sys.modules['kivy_network.network_client'] = importlib.machinery.SourceFileLoader('kivy_network.network_client', os.path.join(kivy_net_path, 'network_client.py')).load_module()
-
 
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
@@ -31,6 +8,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.graphics import Color, Rectangle
 
+# These are now local packages within the collaborative_app directory
 from kivy_dnd.draggable import DraggableBehavior
 from kivy_dnd.drop_zone import DropZoneBehavior
 from kivy_network.network_client import RealTimeClient
