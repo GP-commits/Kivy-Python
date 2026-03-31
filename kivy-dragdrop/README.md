@@ -1,4 +1,4 @@
-# Kivy Drag and Drop 🎯
+# Kivy Drag and Drop 
 
 A lightweight and easy-to-use drag-and-drop behavior library for Kivy applications.
 
