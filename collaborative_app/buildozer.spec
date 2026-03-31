@@ -16,7 +16,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 
 # (str) Application versioning
-version = 0.1
+version = 0.2
 
 # (list) Application requirements
 # We need websockets and kivy, as well as openssl for networking and hostpython3 for the build toolchain.
@@ -39,6 +39,9 @@ android.accept_sdk_license = True
 
 # (str) Android NDK version to use
 # android.ndk = 25b
+
+# (str) python-for-android branch to use
+p4a.branch = master
 
 # (list) The Android architectures to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
 android.archs = arm64-v8a, armeabi-v7a
