@@ -1,0 +1,39 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Buildozer, Cython, and Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential libltdl-dev libffi-dev libssl-dev python3-dev zip unzip zlib1g-dev libncurses5-dev libncursesw5-dev libbz2-dev libsqlite3-dev libgdbm-dev liblzma-dev tk-dev openjdk-17-jdk
+          pip install --upgrade buildozer cython virtualenv
+
+      - name: Build with Buildozer
+        # We must cd into the collaborative_app directory before running buildozer
+        run: |
+          cd collaborative_app
+          buildozer android debug
+          
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: collaborative_app-apk
+          path: collaborative_app/bin/*.apk
