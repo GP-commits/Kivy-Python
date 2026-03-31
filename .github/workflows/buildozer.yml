@@ -41,10 +41,10 @@ jobs:
 
       - name: Build with Buildozer
         # We must cd into the collaborative_app directory before running buildozer
-        # We also use 'yes' to automatically accept any SDK licenses during the build.
+        # We also ensure ~/.local/bin is in the PATH and accept SDK licenses.
         run: |
+          export PATH=$PATH:~/.local/bin
           cd collaborative_app
-          buildozer android clean
           yes | buildozer android debug
           
       - name: Upload APK
