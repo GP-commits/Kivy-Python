@@ -29,7 +29,7 @@ orientation = portrait
 fullscreen = 0
 
 # (int) Android API to use
-android.api = 33
+android.api = 34
 
 # (int) Minimum API your APK will support
 android.minapi = 21
